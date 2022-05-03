@@ -1,11 +1,11 @@
 import { defineComponent } from 'vue'
 
 export default defineComponent({
-  name: 'App',
+  name: 'login',
   setup() {
     return () => (
       <div>
-          <router-view />
+          登录页面
       </div>
     )
   }
