@@ -1,26 +1,26 @@
 import { Module, ActionTree, MutationTree, GetterTree } from 'vuex'
 
 
-export interface IDemoState {
+export interface ICommState {
     fileServer: string
 }
-const state: IDemoState = {
+const state: ICommState = {
     fileServer: `${window.location.origin}/files/files/`
 }
 
-const mutations: MutationTree<IDemoState> = {
+const mutations: MutationTree<ICommState> = {
 
 }
 
-const actions: ActionTree<IDemoState, any> = {
+const actions: ActionTree<ICommState, any> = {
 
 }
 
-const getters: GetterTree<IDemoState, any> = {
+const getters: GetterTree<ICommState, any> = {
 
 }
 
-const stroe: Module<IDemoState, any> = {
+const stroe: Module<ICommState, any> = {
     namespaced: true,
     state,
     mutations,
