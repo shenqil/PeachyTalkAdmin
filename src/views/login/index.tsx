@@ -1,4 +1,4 @@
-import { defineComponent,ref,onMounted,reactive } from 'vue'
+import { defineComponent,ref,onMounted,reactive,computed } from 'vue'
 import { UserOutlined, LockOutlined, ExportOutlined } from "@ant-design/icons-vue";
 import {getCaptchaid,getCaptcha,login} from '@/server/login';
 import {ILoginParams} from '@/server/interface'
@@ -20,6 +20,10 @@ export default defineComponent({
       captchaId: "",
       captchaCode: "",
     })
+  
+    const disabled = computed(() => {
+      return !(formState.userName && formState.password && formState.captchaCode);
+    });
 
     const captcha = useCaptcha(formState);
     const rules = useValidator();
@@ -27,6 +31,12 @@ export default defineComponent({
     //  登录函数
     async function handleLogin() {
       loading.value = true;
+
+      try {
+        await formRef.value.validate()
+      } catch (error) {
+        console.error(error)
+      }
 
       try {
         await login({
@@ -51,29 +61,25 @@ export default defineComponent({
     }
 
     return () => (
-      <div class={styles.login}>
-        <div class="login_title">
-          <img class="login_title-logo" src={logo} alt="" />
-          <h1 class="login_title-text">IM 后台管理系统</h1>
+      <div class={`${styles.login} flex flex-col justify-start items-center h-100vh`}>
+        <div class="flex flex-row mt-20 items-center">
+          <img class="rounded-1/2 mx-3 w-150px" src={logo} alt="" />
+          <h1 class="font-bold mx-3 mt-5 text-center text-white text-shadow-xl text-3xl">IM 后台管理系统</h1>
         </div>
-        <div class="login_container">
+        <div class="bg-white rounded-md shadow-md mt-15 p-30px w-420px">
           <a-form
             ref={formRef}
             layout="vertical"
             model={formState}
             rules={rules}
-            finish={()=>handleLogin()}
           >
             <a-form-item name="userName" label="用户名称">
               <a-input
                 v-model:value={formState.userName}
                 size="large"
                 placeholder="请输入用户名称"
-              >
-                <prefix>
-                  <user-outlined />
-                </prefix>
-              </a-input>
+                prefix={<UserOutlined />}
+              />
             </a-form-item>
     
             <a-form-item name="password" label="密码">
@@ -81,44 +87,43 @@ export default defineComponent({
                 v-model:value={formState.password}
                 size="large"
                 placeholder="请输入用户密码"
-              >
-                <prefix>
-                  <LockOutlined />
-                </prefix>
-              </a-input-password>
+                prefix={<LockOutlined />}
+              />
             </a-form-item>
     
             <a-form-item name="captchaCode" label="验证码">
-              <a-input
-                class="login_captcha-input"
-                v-model:value={formState.captchaCode}
-                size="large"
-                placeholder=""
-              />
-    
-              <a-tooltip title="点击刷新图片" color="#108ee9">
-                <img 
-                  class="login_captcha-img" 
-                  src={captcha.captchaUrl?.value||''} 
-                  onClick={()=>captcha.refreshCaptcha()}
+              <div class="flex flex-row">
+                <a-input
+                  class="flex flex-1"
+                  v-model:value={formState.captchaCode}
+                  size="large"
+                  placeholder=""
                 />
-              </a-tooltip>
+                <a-tooltip title="点击刷新图片" color="#108ee9">
+                  <img 
+                    class="cursor-pointer h-40px ml-10px" 
+                    src={captcha.captchaUrl?.value||''} 
+                    onClick={()=>captcha.refreshCaptcha()}
+                  />
+                </a-tooltip>
+              </div>
             </a-form-item>
     
-            <div class="login_submit">
-              <a-button
-                loading={loading.value}
-                class="login_submit-btn"
-                type="primary"
-                html-type="submit"
+            <a-form-item>
+              <a-button 
+                type="primary" 
+                html-type="submit" 
                 size="large"
+                block={true}
+                disabled={disabled.value} 
+                loading={loading.value}
+                icon={<ExportOutlined />}
+                class="my5px"
+                onClick={handleLogin}
               >
-                <icon>
-                  <ExportOutlined />
-                </icon>
                 登录
               </a-button>
-            </div>
+            </a-form-item>
           </a-form>
         </div>
       </div>
