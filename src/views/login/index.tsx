@@ -1,10 +1,13 @@
-import { defineComponent,ref,onMounted,reactive,computed } from 'vue'
-import { UserOutlined, LockOutlined, ExportOutlined } from "@ant-design/icons-vue";
-import {getCaptchaid,getCaptcha,login} from '@/server/login';
-import {ILoginParams} from '@/server/interface'
-import {md5Hash} from '@/utils/security'
-import {useRouter,useRoute} from 'vue-router'
-import logo from '@/assets/logo.png'
+/* eslint-disable prefer-promise-reject-errors */
+import {
+  defineComponent, ref, onMounted, reactive, computed,
+} from 'vue';
+import { UserOutlined, LockOutlined, ExportOutlined } from '@ant-design/icons-vue';
+import { useRouter, useRoute } from 'vue-router';
+import { getCaptchaid, getCaptcha, login } from '@/server/login';
+import { ILoginParams } from '@/server/interface';
+import { md5Hash } from '@/utils/security';
+import logo from '@/assets/logo.png';
 import styles from './index.module.scss';
 
 export default defineComponent({
@@ -15,15 +18,15 @@ export default defineComponent({
     const formRef = ref();
     const loading = ref(false);
     const formState = reactive({
-      userName: "",
-      password: "",
-      captchaId: "",
-      captchaCode: "",
-    })
-  
-    const disabled = computed(() => {
-      return !(formState.userName && formState.password && formState.captchaCode);
+      userName: '',
+      password: '',
+      captchaId: '',
+      captchaCode: '',
     });
+
+    const disabled = computed(
+      () => !(formState.userName && formState.password && formState.captchaCode),
+    );
 
     const captcha = useCaptcha(formState);
     const rules = useValidator();
@@ -33,9 +36,9 @@ export default defineComponent({
       loading.value = true;
 
       try {
-        await formRef.value.validate()
+        await formRef.value.validate();
       } catch (error) {
-        console.error(error)
+        console.error(error);
       }
 
       try {
@@ -46,11 +49,11 @@ export default defineComponent({
           captchaCode: formState.captchaCode,
         });
 
-        if (typeof route.query.redirect === "string") {
+        if (typeof route.query.redirect === 'string') {
           window.location.href = decodeURIComponent(route.query.redirect);
         } else {
           router.push({
-            name: "dashboard",
+            name: 'dashboard',
           });
         }
       } catch (error) {
@@ -81,7 +84,7 @@ export default defineComponent({
                 prefix={<UserOutlined />}
               />
             </a-form-item>
-    
+
             <a-form-item name="password" label="密码">
               <a-input-password
                 v-model:value={formState.password}
@@ -90,7 +93,7 @@ export default defineComponent({
                 prefix={<LockOutlined />}
               />
             </a-form-item>
-    
+
             <a-form-item name="captchaCode" label="验证码">
               <div class="flex flex-row">
                 <a-input
@@ -100,22 +103,22 @@ export default defineComponent({
                   placeholder=""
                 />
                 <a-tooltip title="点击刷新图片" color="#108ee9">
-                  <img 
-                    class="cursor-pointer h-40px ml-10px" 
-                    src={captcha.captchaUrl?.value||''} 
-                    onClick={()=>captcha.refreshCaptcha()}
+                  <img
+                    class="cursor-pointer h-40px ml-10px"
+                    src={captcha.captchaUrl?.value || ''}
+                    onClick={() => captcha.refreshCaptcha()}
                   />
                 </a-tooltip>
               </div>
             </a-form-item>
-    
+
             <a-form-item>
-              <a-button 
-                type="primary" 
-                html-type="submit" 
+              <a-button
+                type="primary"
+                html-type="submit"
                 size="large"
                 block={true}
-                disabled={disabled.value} 
+                disabled={disabled.value}
                 loading={loading.value}
                 icon={<ExportOutlined />}
                 class="my5px"
@@ -127,15 +130,15 @@ export default defineComponent({
           </a-form>
         </div>
       </div>
-    )
-  }
-})
+    );
+  },
+});
 
 /**
  * 验证码处理函数
- * */ 
-function useCaptcha(formState:ILoginParams){
-  let captchaUrl = ref("");
+ * */
+function useCaptcha(formState:ILoginParams) {
+  const captchaUrl = ref('');
 
   // 刷新二维码
   async function refreshCaptcha() {
@@ -158,41 +161,41 @@ function useCaptcha(formState:ILoginParams){
 /**
  * 校验器规则
  * */
- function useValidator() {
+function useValidator() {
   return {
     userName: {
       required: true,
       validator: (rule: any, value: string) => {
         if (!value) {
-          return Promise.reject("请输入用户名");
+          return Promise.reject('请输入用户名');
         }
         return Promise.resolve();
       },
-      trigger: "blur",
+      trigger: 'blur',
     },
     password: {
       required: true,
       validator(rule: any, value: string) {
         if (!value) {
-          return Promise.reject("请输入密码");
-        } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^]{8,16}$/.test(value)) {
-          return Promise.reject("需要8-16个包含大小写字母和数字的字符");
+          return Promise.reject('请输入密码');
+        } if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^]{8,16}$/.test(value)) {
+          return Promise.reject('需要8-16个包含大小写字母和数字的字符');
         }
         return Promise.resolve();
       },
-      trigger: "blur",
+      trigger: 'blur',
     },
     captchaCode: {
       required: true,
       validator(rule: any, value: string) {
         if (!value) {
-          return Promise.reject("请输入验证码");
-        } else if (!/^\d{4}$/.test(value)) {
-          return Promise.reject("验证码不合法");
+          return Promise.reject('请输入验证码');
+        } if (!/^\d{4}$/.test(value)) {
+          return Promise.reject('验证码不合法');
         }
         return Promise.resolve();
       },
-      trigger: "blur",
+      trigger: 'blur',
     },
   };
 }

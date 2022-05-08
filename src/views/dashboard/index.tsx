@@ -1,4 +1,4 @@
-import { defineComponent } from 'vue'
+import { defineComponent } from 'vue';
 
 export default defineComponent({
   setup() {
@@ -6,6 +6,6 @@ export default defineComponent({
       <div>
           deshboard页面
       </div>
-    )
-  }
-})
+    );
+  },
+});
