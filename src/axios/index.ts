@@ -1,8 +1,7 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { message } from 'ant-design-vue';
-import store from '@/store';
+import { useAuthStore } from '@/store';
 import { compose } from '@/utils/common';
-import type { IToken } from '@/server/interface';
 
 const instance = axios.create({
   timeout: 0,
@@ -33,24 +32,10 @@ export enum Methods {
 }
 
 /**
- * 获取访问令牌
- * */
-function getToken(): IToken {
-  return (store.state as any).auth.token as IToken;
-}
-
-/**
- * 退出登录
- * */
-function loginOut() {
-  store.dispatch('auth/signOut');
-}
-
-/**
  * header增加token
  * */
 function addTokenToHeader(c: AxiosRequestConfig): AxiosRequestConfig {
-  const token = getToken();
+  const authStore = useAuthStore();
   const skipUrlList = [
     '/api/v1/pub/login',
     '/api/v1/pub/login/captcha',
@@ -61,13 +46,13 @@ function addTokenToHeader(c: AxiosRequestConfig): AxiosRequestConfig {
   // 跳过token添加，以及鉴权
   if (!skipUrlList.includes(c.url || '')) {
     // 判断token过期直接退出
-    if (!store.getters['auth/isLogin']) {
-      loginOut();
-      throw new Error('The token has expired');
+    if (!authStore.isLogin) {
+      authStore.signOut();
+      throw new Error('未登录，或者Token已过期');
     }
     if (c.headers) {
       // 合法则添加token
-      c.headers[HeaderKeys.authorization] = `${token.tokenType} ${token.accessToken}`;
+      c.headers[HeaderKeys.authorization] = `${authStore.token.tokenType} ${authStore.token.accessToken}`;
     }
   }
 
@@ -86,22 +71,6 @@ function unifiedErrorPrompt(response: AxiosResponse) {
 }
 
 /**
- * 设置令牌
- * */
-function setToken(response: AxiosResponse) {
-  const urlList = [
-    '/api/v1/pub/login',
-    '/api​/v1​/pub​/refresh-token',
-  ];
-  if (urlList.includes(response.config.url || '')) {
-    // 存在则保存token
-    if (response.data && response.data.accessToken) {
-      store.commit('auth/setToken', response.data);
-    }
-  }
-}
-
-/**
  * 请求拦截器
  * */
 instance.interceptors.request.use(
@@ -113,11 +82,7 @@ instance.interceptors.request.use(
  * 响应拦截器
  * */
 instance.interceptors.response.use(
-  (response) => {
-    setToken(response);
-
-    return response.data;
-  },
+  (response) => response.data,
   (error) => {
     unifiedErrorPrompt(error.response);
 

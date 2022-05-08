@@ -4,17 +4,19 @@ import {
 } from 'vue';
 import { UserOutlined, LockOutlined, ExportOutlined } from '@ant-design/icons-vue';
 import { useRouter, useRoute } from 'vue-router';
-import { getCaptchaid, getCaptcha, login } from '@/server/login';
+import { getCaptchaid, getCaptcha } from '@/server/login';
 import { ILoginParams } from '@/server/interface';
 import { md5Hash } from '@/utils/security';
 import logo from '@/assets/logo.png';
 import styles from './index.module.scss';
+import { useAuthStore } from '@/store';
 
 export default defineComponent({
   name: 'login',
   setup() {
     const router = useRouter();
     const route = useRoute();
+    const authStore = useAuthStore();
     const formRef = ref();
     const loading = ref(false);
     const formState = reactive({
@@ -42,7 +44,7 @@ export default defineComponent({
       }
 
       try {
-        await login({
+        await authStore.loginIn({
           userName: formState.userName.trim(),
           password: md5Hash(formState.password.trim()),
           captchaId: formState.captchaId,
