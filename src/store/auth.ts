@@ -4,39 +4,6 @@ import { refreshToken, loginOut, login } from '@/server/login';
 import { saveTokenToCache, getCacheToken } from '@/utils/cache';
 import router from '@/router';
 
-class TokenManage {
-  refreshTimeout: any;
-
-  advanceTime = 10 * 1000; // 提前10秒刷新token
-
-  /**
-     * 更新token刷新任务
-     * */
-  updateTask(expiresAt:number, refreshTask:Function) {
-    // 先清空上一次任务
-    this.clearTask();
-
-    const remainingMillisecond = expiresAt * 1000 - this.advanceTime - Date.now();
-    if (remainingMillisecond <= 0) {
-      return;
-    }
-
-    console.log(`${remainingMillisecond / 1000}s后刷新Token`);
-    this.refreshTimeout = setTimeout(() => {
-      refreshTask();
-      console.log('token已刷新');
-    }, remainingMillisecond);
-  }
-
-  clearTask() {
-    if (this.refreshTimeout) {
-      clearTimeout(this.refreshTimeout);
-    }
-  }
-}
-
-const tokenManage = new TokenManage();
-
 export interface IAuthState {
   token: IToken,
 }
@@ -58,7 +25,6 @@ export const useAuthStore = defineStore('auth', {
       // 请求接口并且保存token
       this.token = await login(params);
       saveTokenToCache(this.token);
-      tokenManage.updateTask(this.token.expiresAt, this.refresh);
 
       // 存在重定向，跳转到重定向
       const { redirect } = router.currentRoute.value.query;
@@ -70,15 +36,23 @@ export const useAuthStore = defineStore('auth', {
         });
       }
     },
-    async refresh() {
-      this.token = await refreshToken();
+    refreshBySingleMode() {
+      TokenManage.getInstance()
+        .updateRefreshTask(this.token.expiresAt, async () => {
+          try {
+            this.token = await refreshToken();
+            this.refreshBySingleMode();
+          } catch (error) {
+            console.error(error);
+            this.signOut();
+          }
+        });
     },
     async signOut() {
       await loginOut();
       // 清空token
       this.token.expiresAt = 0;
       saveTokenToCache(undefined);
-      tokenManage.clearTask();
 
       // 重定向到登录页
       if (window.location.pathname !== '/login') {
@@ -92,3 +66,47 @@ export const useAuthStore = defineStore('auth', {
     },
   },
 });
+
+class TokenManage {
+  private refreshHandle: any;
+
+  private advanceTime = 10 * 1000; // 提前10秒刷新token
+
+  private static instance:TokenManage;
+
+  // 单例模式，保证token刷新任务只有一个
+  static getInstance():TokenManage {
+    if (!TokenManage.instance) {
+      TokenManage.instance = new TokenManage();
+    }
+
+    return TokenManage.instance;
+  }
+
+  /**
+     * 更新token刷新任务
+     * */
+  updateRefreshTask(expiresAt:number, refreshTask:Function) {
+    // 任务存在，不用创建任务
+    if (this.refreshHandle) {
+      return;
+    }
+
+    // Token已失效,不用更新
+    const remainingMillisecond = expiresAt * 1000 - Date.now();
+    if (remainingMillisecond <= 0) {
+      return;
+    }
+
+    // 注册一个提前10秒更新token的任务
+    const taskTime = remainingMillisecond > this.advanceTime
+      ? remainingMillisecond - this.advanceTime : 0;
+    console.log(`${taskTime / 1000}s后刷新Token`);
+
+    this.refreshHandle = setTimeout(() => {
+      this.refreshHandle = undefined;
+      refreshTask();
+      console.log('token已刷新');
+    }, taskTime);
+  }
+}
