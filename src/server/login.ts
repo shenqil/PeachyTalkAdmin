@@ -51,7 +51,7 @@ export function loginOut() {
 /**
  * 获取用户信息
  * */
-export async function getUserInfo(): Promise<ILoginUserInfo> {
+export async function getCurUserInfo(): Promise<ILoginUserInfo> {
   return await axios.get('/api/v1/pub/current/user') as ILoginUserInfo;
 }
 
