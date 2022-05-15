@@ -3,13 +3,11 @@ import {
 } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import MenuItem, { IMenuTreeProps } from './components/MenuItem';
+import ToUser from './components/ToUser';
 import getMenuData from './menuData';
 import logo from '@/assets/logo.png';
 
 export default defineComponent({
-  components: {
-    MenuItem,
-  },
   setup() {
     const router = useRouter();
     const collapsed = ref(false);
@@ -43,8 +41,14 @@ export default defineComponent({
         {/* 主体 */}
         <a-layout>
           {/* 头部 */}
-          <a-layout-header>
-            <div >
+          <a-layout-header class="bg-white p-0">
+            <div class="flex flex-row justify-between">
+              {/* 左边 */}
+              <div></div>
+              {/* 右边 */}
+              <div class="px-10">
+                <ToUser/>
+              </div>
             </div>
           </a-layout-header>
 
