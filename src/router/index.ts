@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 import beforeEachHandle from './beforeEachHandle';
+import verifiedBeforeEnter from './verifiedBeforeEnter';
 import AdminLayout from '@/layouts/AdminLayout';
 import modules from './modules/index';
 
@@ -7,6 +8,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     component: AdminLayout,
+    beforeEnter: verifiedBeforeEnter,
     redirect: {
       name: 'dashboard',
     },
@@ -24,7 +26,7 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/login',
-    name: 'Login',
+    name: 'login',
     component: () => import(/* webpackChunkName: "Login" */ '@/views/login'),
   },
   {

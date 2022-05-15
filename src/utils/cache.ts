@@ -22,6 +22,10 @@ export function getCacheToken(): IToken {
 /**
  * 保存令牌到缓存
  * */
-export function saveTokenToCache(token: IToken) {
-  localStorage.setItem(ECacheKey.TOKEN_KEY, JSON.stringify(token));
+export function saveTokenToCache(token: IToken | undefined) {
+  if (token) {
+    localStorage.setItem(ECacheKey.TOKEN_KEY, JSON.stringify(token));
+  } else {
+    localStorage.removeItem(ECacheKey.TOKEN_KEY);
+  }
 }
