@@ -7,7 +7,7 @@ import {
   IStatusResult,
 } from './interface/index';
 
-const CURRENT_URL = '/api/v1/management/users';
+const CURRENT_URL = '/api/v1/user';
 
 /**
  * 查询数据

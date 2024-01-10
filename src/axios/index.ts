@@ -37,10 +37,10 @@ export enum Methods {
 function addTokenToHeader(c: AxiosRequestConfig): AxiosRequestConfig {
   const authStore = useAuthStore();
   const skipUrlList = [
-    '/api/v1/pub/login',
-    '/api/v1/pub/login/captcha',
-    '/api/v1/pub/login/captchaid',
-    '/api/v1/pub/login/exit',
+    '/api/v1/login',
+    '/api/v1/login/captcha',
+    '/api/v1/login/captchaid',
+    '/api/v1/login/exit',
   ];
 
   // 跳过token添加，以及鉴权

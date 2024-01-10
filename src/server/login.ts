@@ -11,7 +11,7 @@ import {
  * 获取验证码信息
  * */
 export async function getCaptchaid(): Promise<string> {
-  const res = await axios.get('/api/v1/pub/login/captchaid') as any;
+  const res = await axios.get('/api/v1/login/captchaid') as any;
 
   if (!res || typeof res.captchaId !== 'string') {
     throw new Error('数据返回错误');
@@ -24,40 +24,40 @@ export async function getCaptchaid(): Promise<string> {
  * 响应图形验证码
  * */
 export function getCaptcha(id: string): string {
-  return `/api/v1/pub/login/captcha?id=${id}`;
+  return `/api/v1/login/captcha?id=${id}`;
 }
 
 /**
  * 用户登录
  * */
 export async function login(params: ILoginParams): Promise<IToken> {
-  return await axios.post('/api/v1/pub/login', params) as IToken;
+  return await axios.post('/api/v1/login', params) as IToken;
 }
 
 /**
  * 刷新令牌
  * */
 export function refreshToken(): Promise<IToken> {
-  return axios.post('/api​/v1​/pub​/refresh-token');
+  return axios.post('/api​/v1​/refresh-token');
 }
 
 /**
  * 用户登出
  * */
 export function loginOut() {
-  return axios.post('/api/v1/pub/login/exit');
+  return axios.post('/api/v1/login/exit');
 }
 
 /**
  * 获取用户信息
  * */
 export async function getCurUserInfo(): Promise<ILoginUserInfo> {
-  return await axios.get('/api/v1/pub/current/user') as ILoginUserInfo;
+  return await axios.get('/api/v1/current/user') as ILoginUserInfo;
 }
 
 /**
  * 更新密码
  * */
 export async function updatePassword(params: IUpdatePassParams): Promise<IUpdatePassResult> {
-  return await axios.put('/api/v1/pub/current/password', params) as IUpdatePassResult;
+  return await axios.put('/api/v1/current/password', params) as IUpdatePassResult;
 }
