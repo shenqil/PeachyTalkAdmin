@@ -69,7 +69,7 @@ export default defineComponent({
       <div class={`${styles.login} flex flex-col justify-start items-center h-100vh`}>
         <div class="flex flex-row mt-20 items-center">
           <img class="rounded-1/2 mx-3 w-150px" src={logo} alt="" />
-          <h1 class="font-bold mx-3 mt-5 text-center text-white text-shadow-xl text-3xl">IM 后台管理系统</h1>
+          <h1 class="font-bold mx-3 mt-5 text-center text-white text-shadow-xl text-3xl">PeachyTalk后台管理系统</h1>
         </div>
         <div class="bg-white rounded-md shadow-md mt-15 p-30px w-420px">
           <a-form

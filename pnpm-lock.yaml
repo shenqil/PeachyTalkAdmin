@@ -14,6 +14,9 @@ dependencies:
   axios:
     specifier: ^0.27.2
     version: 0.27.2
+  dayjs:
+    specifier: ^1.11.10
+    version: 1.11.10
   md5:
     specifier: ^2.3.0
     version: 2.3.0
@@ -882,7 +885,7 @@ packages:
       '@simonwep/pickr': 1.8.2
       array-tree-filter: 2.1.0
       async-validator: 4.1.1
-      dayjs: 1.11.1
+      dayjs: 1.11.10
       dom-align: 1.12.3
       dom-scroll-into-view: 2.0.1
       lodash: 4.17.21
@@ -1119,8 +1122,8 @@ packages:
   /csstype@2.6.20:
     resolution: {integrity: sha512-/WwNkdXfckNgw6S5R125rrW8ez139lBHWouiBvX8dfMFtcn6V81REDqnH7+CRpRipfYlyU1CmOnOxrmGcFOjeA==}
 
-  /dayjs@1.11.1:
-    resolution: {integrity: sha512-ER7EjqVAMkRRsxNCC5YqJ9d9VQYuWdGt7aiH2qA5R5wt8ZmWaP2dLUSIK6y/kVzLMlmh1Tvu5xUf4M/wdGJ5KA==}
+  /dayjs@1.11.10:
+    resolution: {integrity: sha512-vjAczensTgRcqDERK0SR2XMwsF/tSvnvlv6VcF2GIhg6Sx4yOIt/irsr1RDJsKiIyBzJDpCoXiWWq28MqH2cnQ==}
     dev: false
 
   /debug@2.6.9:

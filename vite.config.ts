@@ -30,8 +30,8 @@ export default defineConfig({
         target: 'http://localhost:10888/',
         changeOrigin: true,
       },
-      '/files': {
-        target: 'http://localhost:8080/',
+      '/avatar': {
+        target: 'http://127.0.0.1:9000/',
         changeOrigin: true,
       },
     }

@@ -9,14 +9,15 @@ export interface IUser {
   id: string,
   avatar:string,
   userName: string,
-  realName: string,
   password?: string,
+  realName: string,
+  gender:number,
+  dateOfBirth:string,
   phone?: string,
   email?: string,
   status: number,
   creator?: string,
   createdAt?: string,
-  userRoles?: Array<IUserRole>
 }
 
 export interface IUserQueryParam extends IPageParams {

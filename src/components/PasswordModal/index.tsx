@@ -6,7 +6,7 @@ import {
   WritableComputedRef,
   Ref,
 } from 'vue';
-import { RuleObject } from 'ant-design-vue/es/form/interface';
+import type { RuleObject } from 'ant-design-vue/es/form/interface';
 import { message } from 'ant-design-vue';
 import { updatePassword } from '@/server/login';
 import { md5Hash } from '@/utils/security';

@@ -12,7 +12,7 @@ const instance = axios.create({
 });
 
 export enum ContentType {
-  from = 'application/x-www-form-urlencoded',
+  from = 'multipart/form-data',
   json = 'application/json',
 }
 
