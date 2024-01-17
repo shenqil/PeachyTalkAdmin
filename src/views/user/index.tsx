@@ -28,10 +28,16 @@ const columns = [
     width: 80,
   },
   {
-    title: '出生日期', dataIndex: 'dateOfBirth', key: 'dateOfBirth', width: 160,
+    title: '出生日期',
+    dataIndex: 'dateOfBirth',
+    key: 'dateOfBirth',
+    width: 160,
   },
   {
-    title: '头像', dataIndex: 'avatar', key: 'avatar', width: 100,
+    title: '头像',
+    dataIndex: 'avatar',
+    key: 'avatar',
+    width: 100,
   },
   {
     title: '手机号',
@@ -87,10 +93,6 @@ export default defineComponent({
 
     const { onAddUser } = useAddUser(userModalInfo);
 
-    // const delete = ()=> {
-
-    // }
-
     const refresh = async (reset = false) => {
       if (state.loading) {
         return;
@@ -134,18 +136,39 @@ export default defineComponent({
       refresh();
     };
 
-    const onSubmit = (isEdit:boolean) => {
-      if (!isEdit && state.pagination.total === state.pagination.pageSize) {
-        state.pagination.current += 1;
-      }
-
-      refresh();
+    const onSubmit = (isEdit: boolean) => {
+      refresh(isEdit);
     };
 
-    const onEdit = (record:IUser) => {
+    const onEdit = (record: IUser) => {
       userModalInfo.value = {
         ...record,
       };
+    };
+
+    const onChangeUserStatus = async (id: string, status: number) => {
+      state.loading = true;
+      const changeFn = status === 1 ? userServer.disable : userServer.enable;
+      try {
+        await changeFn(id);
+        state.loading = false;
+        refresh(false);
+      } catch (error) {
+        state.loading = false;
+        console.error(error);
+      }
+    };
+
+    const onDelete = async (id: string) => {
+      state.loading = true;
+      try {
+        await userServer.remove(id);
+        state.loading = false;
+        refresh(state.data.length === 1);
+      } catch (error) {
+        state.loading = false;
+        console.error(error);
+      }
     };
 
     onMounted(() => {
@@ -183,6 +206,7 @@ export default defineComponent({
                 placeholder="请输入用户名称"
                 enter-button="搜索"
                 size="large"
+                allowClear={true}
                 onSearch={onSearch}
               />
             </div>
@@ -204,29 +228,59 @@ export default defineComponent({
               bodyCell: ({ column, text, record }: any) => {
                 switch (column.key) {
                   case 'gender':
-                    return text === 0 ? '女' : '男';
+                    return text === 1 ? '男' : '女';
 
                   case 'avatar':
-                    return <img src={`/avatar/${text}`} alt={text} class="w-12 h-12"/>;
+                    return (
+                      <img
+                        src={`/avatar/${text}`}
+                        alt={text}
+                        class="w-12 h-12"
+                      />
+                    );
 
                   case 'action':
                     return (
                       <span>
-                        <a-button type="primary" size="small" class="mr-5" onClick={() => onEdit(record)}>
+                        <a-button
+                          type="primary"
+                          size="small"
+                          class="mr-5"
+                          onClick={() => onEdit(record)}
+                        >
                           编辑
                         </a-button>
 
-                        <a-button type="primary" size="small" danger class="mr-5">
-                          删除
-                        </a-button>
-
-                        <a-button
-                          type="dashed"
-                          size="small"
-                          danger
+                        <a-popconfirm
+                          title={`确认${
+                            record.status === 1 ? '禁用' : '启用'
+                          }当前用户？`}
+                          ok-text="确认"
+                          cancel-text="取消"
+                          onConfirm={() => onChangeUserStatus(record.id, record.status)
+                          }
+                          class="mr-5"
                         >
-                          禁用
-                        </a-button>
+                          <a-button
+                            type="primary"
+                            size="small"
+                            ghost
+                            danger={record.status === 1}
+                          >
+                            {record.status === 1 ? '禁用' : '启用'}
+                          </a-button>
+                        </a-popconfirm>
+
+                        <a-popconfirm
+                          title="确认删除当前用户？"
+                          ok-text="确认"
+                          cancel-text="取消"
+                          onConfirm={() => onDelete(record.id)}
+                        >
+                          <a-button type="primary" size="small" danger>
+                            删除
+                          </a-button>
+                        </a-popconfirm>
                       </span>
                     );
 
@@ -239,7 +293,10 @@ export default defineComponent({
           </a-table>
 
           {/* 模态框 */}
-          <UserDetailsModal modelValue={userModalInfo.value} onSubmit={onSubmit}/>
+          <UserDetailsModal
+            modelValue={userModalInfo.value}
+            onSubmit={onSubmit}
+          />
         </a-spin>
       </div>
     );

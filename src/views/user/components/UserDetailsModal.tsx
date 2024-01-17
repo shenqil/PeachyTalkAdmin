@@ -1,13 +1,14 @@
 import {
   defineComponent, computed, ref, toRefs, watch,
 } from 'vue';
-import type { PropType } from 'vue';
+import type { PropType, Ref } from 'vue';
 import type { RuleObject } from 'ant-design-vue/es/form/interface';
 import { message } from 'ant-design-vue';
 import { PlusOutlined } from '@ant-design/icons-vue';
 import type { IUser } from '@/server/interface';
 import userServer from '@/server/user';
 import fileServer from '@/server/file';
+import { md5Hash } from '@/utils/security';
 
 export default defineComponent({
   name: 'UserDetailsModal',
@@ -31,7 +32,8 @@ export default defineComponent({
     const confirmLoading = ref(false);
     const isEdit = computed<boolean>(() => !!props.modelValue?.id);
 
-    const rules = useValidator();
+    const rules = useValidator(isEdit);
+
     const { upAvatar, beforeUpload, avatarUpload } = useAvatar();
 
     watch(modelRef, () => {
@@ -51,8 +53,11 @@ export default defineComponent({
         const submitFn = isEdit.value ? userServer.update : userServer.create;
 
         try {
-          modelRef.value.avatar = await avatarUpload(modelRef.value.userName);
-          await submitFn(modelRef.value);
+          await submitFn({
+            ...modelRef.value,
+            password: modelRef.value.password ? md5Hash(modelRef.value.password) : '',
+          });
+          await avatarUpload(modelRef.value.userName);
 
           visible.value = false;
           message.success(isEdit.value ? '用户信息更新成功' : '用户创建成功');
@@ -82,13 +87,17 @@ export default defineComponent({
         <a-form
           ref={formRef}
           model={modelRef.value}
-          rules={rules}
+          rules={rules.value}
           label-col={{ span: 8 }}
           wrapper-col={{ span: 16 }}
           autocomplete="off"
         >
           <a-form-item label="账号" name="userName">
-            <a-input v-model:value={modelRef.value.userName} />
+            <a-input
+              v-model:value={modelRef.value.userName}
+              disabled={isEdit.value}
+              bordered={!isEdit.value}
+            />
           </a-form-item>
 
           <a-form-item label="密码" name="password">
@@ -121,7 +130,7 @@ export default defineComponent({
           <a-form-item label="性别" name="gender">
             <a-radio-group v-model:value={modelRef.value.gender}>
               <a-radio value={1}>男</a-radio>
-              <a-radio value={0}>女</a-radio>
+              <a-radio value={2}>女</a-radio>
             </a-radio-group>
           </a-form-item>
 
@@ -148,11 +157,11 @@ export default defineComponent({
 /**
  * 校验器规则
  * */
-function useValidator() {
-  const rules = {
+function useValidator(isEdit: Ref<boolean>) {
+  return computed(() => ({
     userName: [
       {
-        required: true,
+        required: !isEdit.value,
         validator: (rule: RuleObject, value: string) => {
           if (!value) {
             return Promise.reject('请输入账号');
@@ -184,14 +193,22 @@ function useValidator() {
 
     password: [
       {
-        required: true,
+        required: !isEdit.value,
         validator: (rule: RuleObject, value: string) => {
+          if (isEdit.value) {
+            if (value && !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^]{8,16}$/.test(value)) {
+              return Promise.reject('需要8-16个包含大小写字母和数字的字符');
+            }
+            return Promise.resolve();
+          }
+
           if (!value) {
             return Promise.reject('请输入密码');
           }
           if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^]{8,16}$/.test(value)) {
             return Promise.reject('需要8-16个包含大小写字母和数字的字符');
           }
+
           return Promise.resolve();
         },
         trigger: 'change',
@@ -227,9 +244,7 @@ function useValidator() {
         trigger: 'change',
       },
     ],
-  };
-
-  return rules;
+  }));
 }
 
 /**
@@ -277,14 +292,10 @@ function useAvatar() {
     return false;
   };
 
-  const avatarUpload = async (userName: string | undefined) => {
+  const avatarUpload = async (userName: string) => {
     if (avatarFile.value) {
-      const fileName = avatarFile.value.name;
       const { id } = await fileServer.upload({
-        name:
-          userName && fileName
-            ? `${userName}${fileName.substring(fileName.lastIndexOf('.'))}`
-            : undefined,
+        name: userName,
         size: avatarFile.value.size,
         avatar: true,
         file: avatarFile.value,
