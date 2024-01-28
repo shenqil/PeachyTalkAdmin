@@ -11,7 +11,7 @@ export default defineComponent({
   setup() {
     const { userInfo } = storeToRefs(useUserStore());
     const { signOut } = useAuthStore();
-    const { passwordModal, handleOpenPasswordModal } = usePasswordModal();
+    const { passwordModal } = usePasswordModal();
 
     return () => (
       <div>
@@ -19,9 +19,9 @@ export default defineComponent({
           trigger={['click']}
           overlay={
             <a-menu>
-              <a-menu-item key="modifyPassword" onclick={handleOpenPasswordModal}>
+              {/* <a-menu-item key="modifyPassword" onclick={handleOpenPasswordModal}>
                 修改密码
-              </a-menu-item>
+              </a-menu-item> */}
 
               <a-menu-divider />
 
@@ -33,15 +33,15 @@ export default defineComponent({
         >
           <div class="cursor-pointer">
             <span class="px-2">
-              { userInfo.value?.realName || '' }
+              {userInfo.value?.realName || ''}
             </span>
             <DownOutlined />
           </div>
 
         </a-dropdown>
 
-        <PasswordModal v-model={passwordModal.value}/>
-    </div>
+        <PasswordModal v-model={passwordModal.value} />
+      </div>
     );
   },
 });
