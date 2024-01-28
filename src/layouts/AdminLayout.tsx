@@ -20,21 +20,27 @@ export default defineComponent({
     }
 
     return () => (
-      <a-layout >
+      <a-layout>
         {/* 侧边栏 */}
-        <a-layout-sider class="h-100vh" v-model:collapsed={collapsed.value} collapsible>
+        <a-layout-sider
+          class="h-100vh"
+          v-model:collapsed={collapsed.value}
+          collapsible
+        >
           {/* logo */}
           <div class="cursor-pointer p-2" onClick={gotoHome}>
-            <img src={logo} alt="" class="rounded-full overflow-hidden"/>
+            <img src={logo} alt="" class="rounded-full overflow-hidden" />
           </div>
 
           {/* 菜单 */}
-          <a-menu v-model:selectedKeys={selectedKeys.value} theme="dark" mode="inline">
-            {
-              menuList.map(
-                (menuItem) => <MenuItem key={menuItem.id} item={menuItem}/>,
-              )
-            }
+          <a-menu
+            v-model:selectedKeys={selectedKeys.value}
+            theme="dark"
+            mode="inline"
+          >
+            {menuList.map((menuItem) => (
+              <MenuItem key={menuItem.id} item={menuItem} />
+            ))}
           </a-menu>
         </a-layout-sider>
 
@@ -47,13 +53,13 @@ export default defineComponent({
               <div></div>
               {/* 右边 */}
               <div class="px-10">
-                <ToUser/>
+                <ToUser />
               </div>
             </div>
           </a-layout-header>
 
           {/* 内容区 */}
-          <a-layout-content >
+          <a-layout-content>
             <div>
               <router-view />
             </div>
@@ -81,12 +87,16 @@ function useMenuSelected() {
   /**
    * 深度优先查找第一个匹配的菜单
    * */
-  function findMenuItem(list:IMenuTreeProps[], key:string, value:string)
-    :IMenuTreeProps | undefined {
+  function findMenuItem(
+    list: IMenuTreeProps[],
+    key: string,
+    value: string,
+  ): IMenuTreeProps | undefined {
     for (const iterator of list) {
       if ((iterator as any)[key] === value) {
         return iterator;
-      } if (iterator.children && iterator.children.length) {
+      }
+      if (iterator.children && iterator.children.length) {
         const item = findMenuItem(iterator.children, key, value);
         if (item) {
           return item;
@@ -97,12 +107,18 @@ function useMenuSelected() {
     return undefined;
   }
 
-  watch(route, () => {
-    const menuItem = findMenuItem(menuList, 'routePath', route.path);
-    if (menuItem?.id) {
-      selectedKeys.value = [menuItem.id];
-    }
-  });
+  watch(
+    route,
+    () => {
+      const menuItem = findMenuItem(menuList, 'routePath', route.path);
+      if (menuItem?.id) {
+        selectedKeys.value = [menuItem.id];
+      }
+    },
+    {
+      immediate: true,
+    },
+  );
 
   const currentRoutePath = computed(() => {
     const selectedValue = selectedKeys.value[0] || '';
