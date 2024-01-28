@@ -5,8 +5,6 @@ import type { IPagination, IUser, IUserQueryParam } from '@/server/interface';
 import UserDetailsModal from './components/UserDetailsModal';
 import userServer from '@/server/user';
 
-type Key = string | number;
-
 const columns = [
   {
     title: '用户名称',
@@ -62,7 +60,7 @@ const columns = [
 export default defineComponent({
   setup() {
     const state = reactive<{
-      selectedRowKeys: Key[];
+      selectedRowKeys: string[];
       loading: boolean;
       queryParam: IUserQueryParam;
       data: IUser[];
@@ -114,8 +112,7 @@ export default defineComponent({
       state.loading = false;
     };
 
-    const onSelectChange = (selectedRowKeys: Key[]) => {
-      console.log('selectedRowKeys changed: ', selectedRowKeys);
+    const onSelectChange = (selectedRowKeys: any) => {
       state.selectedRowKeys = selectedRowKeys;
     };
 
@@ -171,6 +168,18 @@ export default defineComponent({
       }
     };
 
+    const onBatchDelete = async () => {
+      state.loading = true;
+      try {
+        await userServer.batchDelete(state.selectedRowKeys);
+        state.loading = false;
+        refresh(state.data.length === state.selectedRowKeys.length);
+      } catch (error) {
+        state.loading = false;
+        console.error(error);
+      }
+    };
+
     onMounted(() => {
       refresh(true);
     });
@@ -193,9 +202,9 @@ export default defineComponent({
                 type="primary"
                 size="large"
                 danger
-                disabled={!hasSelected}
+                disabled={!hasSelected.value}
                 loading={state.loading}
-                // onClick={() => delect()}
+                onClick={() => onBatchDelete()}
               >
                 删除
               </a-button>
@@ -214,13 +223,14 @@ export default defineComponent({
 
           {/* 表单 */}
           <a-table
+            rowKey="id"
             columns={columns}
             data-source={state.data}
             row-selection={{
               selectedRowKeys: state.selectedRowKeys,
               onChange: onSelectChange,
             }}
-            scroll={{ x: 1000 }}
+            scroll={{ x: 1000, y: 'calc(100vh - 350px)' }}
             onChange={onChange}
             pagination={state.pagination}
           >

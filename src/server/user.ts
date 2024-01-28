@@ -7,7 +7,7 @@ import {
   IStatusResult,
 } from './interface/index';
 
-const CURRENT_URL = '/api/v1/user';
+const CURRENT_URL = '/api/v1/users';
 
 /**
  * 查询数据
@@ -45,6 +45,17 @@ async function remove(id: string): Promise<IStatusResult> {
 }
 
 /**
+ * 批量删除
+ * */
+async function batchDelete(ids: string[]): Promise<IStatusResult> {
+  return axios.delete(`${CURRENT_URL}`, {
+    data: {
+      ids,
+    },
+  });
+}
+
+/**
  * 失能
  * */
 async function disable(id: string): Promise<IStatusResult> {
@@ -64,6 +75,7 @@ export default {
   get,
   update,
   remove,
+  batchDelete,
   disable,
   enable,
 };
